@@ -1,91 +1,97 @@
 <!DOCTYPE html>
-    <head>
-        <!-- Spotify CSS files -->
-        <link rel="stylesheet" type="text/css" href="sp://resources/css/eve.css">
-        <link rel="stylesheet" type="text/css" href="sp://resources/css/api.css">
-        <link rel="stylesheet" type="text/css" href="sp://resources/css/player.css">
-        <link rel="stylesheet" type="text/css" href="sp://resources/css/list.css">
+<head>
+<!-- Spotify CSS files -->
+<link rel="stylesheet" type="text/css" href="sp://resources/css/eve.css">
+<link rel="stylesheet" type="text/css" href="sp://resources/css/api.css">
+<link rel="stylesheet" type="text/css" href="sp://resources/css/player.css">
+<link rel="stylesheet" type="text/css" href="sp://resources/css/list.css">
+</head>
+<body>
+    <div id="wrapper">
+        <div class="section">
+            <h1>Music/Audio to help you study/focus.</h1>
+            <dl>
+                <dt>Source:</dt>
+                <dd>www.reddit.com/r/MusicForConcentration</dd>
 
-    </head>
-    <body>
-        <div id="wrapper">
-			<div class="section">
-			    <h1>Music/Audio to help you study/focus.</h1>
-				<dl>
-					<dt>Source:</dt>
-					<dd>www.reddit.com/r/MusicForConcentration</dd>
-					
-					<dt>Info:</dt>
-					<dd>
-						<p>A place to post and find new music/audio that helps with studying. Anything else related to concentration would also be appreciated! Feel free to post from any genre, if black metal helps you study, go for it. Message me if you want to become a mod.</p>
-					</dd>
-				</dl>
+                <dt>Info:</dt>
+                <dd>
+                    <p>A place to post and find new music/audio that
+                        helps with studying. Anything else related to
+                        concentration would also be appreciated! Feel
+                        free to post from any genre, if black metal
+                        helps you study, go for it. Message me if you
+                        want to become a mod.</p>
+                </dd>
+            </dl>
 
-			    <div>
-			        <ul id="results"></ul>
-			    </div>
+            <div>
+                <ul id="results"></ul>
+            </div>
 
-			    <script>
-			    	var sp = getSpotifyApi();
-					var models = sp.require('$api/models');
-					var views = sp.require("$api/views");
-			
-			        var searchHTML = document.getElementById('results');
-			        var fragment = document.createDocumentFragment();
-	
-					var url = 'http://www.reddit.com/r/MusicForConcentration.json';
-			        var xhr = new XMLHttpRequest();
-			        xhr.open('GET', url);
-			        xhr.onreadystatechange = function () {
-			            if (xhr.readyState != 4) return;
-			            var response = JSON.parse(xhr.responseText);
-			            console.log(response);
-						handle(response);
-			        }
-			        xhr.send(null);
+            <script>
+                var sp = getSpotifyApi();
+                var models = sp.require('$api/models');
+                var views = sp.require("$api/views");
 
-					function handle(response) {
-						var searches = [];
-						var size = response.data.children.length;
-						for(i=0;i<size;i++) {
-							var d = response.data.children[i];
-							searchForSong(d.data.title);
-						}
-						searchHTML.appendChild(fragment);
-					}
+                var searchHTML = document.getElementById('results');
+                var fragment = document.createDocumentFragment();
 
-					function searchForSong(query) {
-						var search = new models.Search(query);
+                var url = 'http://www.reddit.com/r/MusicForConcentration.json';
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState != 4)
+                        return;
+                    var response = JSON.parse(xhr.responseText);
+                    console.log(response);
+                    handle(response);
+                }
+                xhr.send(null);
 
-				        search.localResults = models.LOCALSEARCHRESULTS.IGNORE;
-						search.pageSize = 1;
+                function handle(response) {
+                    var searches = [];
+                    var size = response.data.children.length;
+                    for (i = 0; i < size; i++) {
+                        var d = response.data.children[i];
+                        searchForSong(d.data.title);
+                    }
+                    searchHTML.appendChild(fragment);
+                }
 
-				        search.observe(models.EVENT.CHANGE, function() {
-							var results = search.tracks;
-							if (results[0]) {
-								console.log("Found:" + results[0].name);
-								render(results[0]);
-							}
+                function searchForSong(query) {
+                    var search = new models.Search(query);
 
-				        });
-						search.appendNext();
-					}
-					function render(track) {
-			            var link = document.createElement('li');
-				        var single_track = models.Track.fromURI(track.uri);
-				        var single_track_playlist = new models.Playlist();
-				        single_track_playlist.add(single_track);
-				        var single_track_player = new views.Player();
-				        single_track_player.track = null; // Don't play the track right away
-				        single_track_player.context = single_track_playlist;
+                    search.localResults = models.LOCALSEARCHRESULTS.IGNORE;
+                    search.pageSize = 1;
 
-				        /* Pass the player HTML code to #single-track-player */
-				        link.appendChild(single_track_player.node);
-			            fragment.appendChild(link);
-					}
-			    </script>
-			</div>
-                
+                    search.observe(
+                                    models.EVENT.CHANGE,
+                                    function() {
+                                        var results = search.tracks;
+                                        if (results[0]) {
+                                            console.log("Found:"+ results[0].name);
+                                            render(results[0]);
+                                        }
+                                    });
+                    search.appendNext();
+                }
+
+                function render(track) {
+                    var link = document.createElement('li');
+                    var single_track = models.Track.fromURI(track.uri);
+                    var single_track_playlist = new models.Playlist();
+                    single_track_playlist.add(single_track);
+                    var single_track_player = new views.Player();
+                    single_track_player.track = null; // Don't play the track right away
+                    single_track_player.context = single_track_playlist;
+
+                    /* Pass the player HTML code to #single-track-player */
+                    link.appendChild(single_track_player.node);
+                    fragment.appendChild(link);
+                }
+            </script>
         </div>
-    </body>
+    </div>
+</body>
 </html>
